@@ -37,12 +37,17 @@ func (s *SnapShotService) Get(cycle int) (SnapShot, error) {
 	var snapShotQuery SnapShotQuery
 	var snap SnapShot
 
+	constants, err := s.gt.GetNetworkConstants()
+	if err != nil {
+		return snap, errors.Wrapf(err, "could not get snapshot at cycle '%d'", cycle)
+	}
+
 	currentCycle, err := s.gt.Cycle.GetCurrent()
 	if err != nil {
 		return snap, errors.Wrapf(err, "could not get snapshot at cycle '%d'", cycle)
 	}
 
-	if cycle > currentCycle+s.gt.Constants.PreservedCycles-1 {
+	if cycle > currentCycle+constants.PreservedCycles-1 {
 		return snap, errors.Errorf("could not get snapshot at cycle '%d', cycle requested is in the future", cycle)
 	}
 
@@ -51,7 +56,7 @@ func (s *SnapShotService) Get(cycle int) (SnapShot, error) {
 
 	query := "/chains/main/blocks/"
 	if cycle < currentCycle {
-		block := strconv.Itoa(cycle*s.gt.Constants.BlocksPerCycle + 1)
+		block := strconv.Itoa(cycle*constants.BlocksPerCycle + 1)
 		query = query + block + "/context/raw/json/cycle/" + strCycle
 	} else {
 		query = query + "head/context/raw/json/cycle/" + strCycle
@@ -69,7 +74,7 @@ func (s *SnapShotService) Get(cycle int) (SnapShot, error) {
 
 	snap.Number = snapShotQuery.RollSnapShot
 
-	snap.AssociatedBlock = ((cycle - s.gt.Constants.PreservedCycles - 2) * s.gt.Constants.BlocksPerCycle) + (snap.Number+1)*s.gt.Constants.BlocksPerRollSnapshot
+	snap.AssociatedBlock = ((cycle - constants.PreservedCycles - 2) * constants.BlocksPerCycle) + (snap.Number+1)*s.gt.Constants.BlocksPerRollSnapshot
 	if snap.AssociatedBlock < 1 {
 		snap.AssociatedBlock = 1
 	}

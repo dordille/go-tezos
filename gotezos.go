@@ -15,7 +15,7 @@ const MUTEZ = 1000000
 // like Block, SnapSHot, Cycle, Account, Delegate, Operations, Contract, and Network
 type GoTezos struct {
 	client    *client
-	Constants NetworkConstants
+	Constants *NetworkConstants
 	Block     *BlockService
 	SnapShot  *SnapShotService
 	Cycle     *CycleService
@@ -56,12 +56,6 @@ func NewGoTezos(URL string) (*GoTezos, error) {
 
 	gt.client = newClient(URL)
 
-	var err error
-	gt.Constants, err = gt.Network.GetConstants()
-	if err != nil {
-		return &gt, errors.Wrap(err, "could not get network constants")
-	}
-
 	return &gt, nil
 }
 
@@ -98,6 +92,18 @@ func (gt *GoTezos) Post(path string, args string) ([]byte, error) {
 	}
 
 	return resp, nil
+}
+
+func (gt *GoTezos) GetNetworkConstants() (NetworkConstants, error) {
+	if gt.Constants == nil {
+		networkConstants, err := gt.Network.GetConstants()
+		if err != nil {
+			return NetworkConstants{}, err
+		}
+		gt.Constants = &networkConstants
+	}
+
+	return *gt.Constants, nil
 }
 
 func (gt *GoTezos) handleRPCError(resp []byte) error {

@@ -271,7 +271,12 @@ func (d *DelegateService) delegationReportWorker(jobs <-chan delegationReportJob
 // GetRewards gets the rewards earned by a delegate for a specific cycle.
 func (d *DelegateService) GetRewards(delegatePhk string, cycle int) (string, error) {
 	rewards := FrozenBalanceRewards{}
-	level := (cycle+1)*(d.gt.Constants.BlocksPerCycle) + 1
+	constants, err := d.gt.GetNetworkConstants()
+	if err != nil {
+		return "", errors.Wrapf(err, "could not get rewards for %s at %d cycle", delegatePhk, cycle)
+	}
+
+	level := (cycle+1)*(constants.BlocksPerCycle) + 1
 
 	head, err := d.gt.Block.Get(level)
 	if err != nil {
