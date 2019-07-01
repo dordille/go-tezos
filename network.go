@@ -2,6 +2,7 @@ package gotezos
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -175,6 +176,16 @@ func (n *NetworkService) Self() (string, error) {
 	}
 
 	return networkID, nil
+}
+
+func (n *NetworkService) TrustPeer(peerID string) error {
+	query := fmt.Sprintf("/network/peers/%s/trust", peerID)
+	_, err := n.gt.Get(query, nil)
+	if err != nil {
+		return errors.Wrapf(err, "count not trust peer id '%s'", query)
+	}
+
+	return nil
 }
 
 // UnmarshalJSON unmarshals the bytes received as a parameter, into the type NetworkVersion.
