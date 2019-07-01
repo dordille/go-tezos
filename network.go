@@ -161,6 +161,22 @@ func (n *NetworkService) Connections() (Connections, error) {
 	return connections, nil
 }
 
+func (n *NetworkService) Self() (string, error) {
+	var networkID string
+	query := "/network/self"
+	resp, err := n.gt.Get(query, nil)
+	if err != nil {
+		return networkID, errors.Wrapf(err, "could not get selfs peer id '%s'", query)
+	}
+
+	err = json.Unmarshal(resp, &networkID)
+	if err != nil {
+		return networkID, errors.Wrapf(err, "could not get selfs peer id '%s'", query)
+	}
+
+	return networkID, nil
+}
+
 // UnmarshalJSON unmarshals the bytes received as a parameter, into the type NetworkVersion.
 func (nvs *NetworkVersions) unmarshalJSON(v []byte) (NetworkVersions, error) {
 	networkVersions := NetworkVersions{}
