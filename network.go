@@ -188,6 +188,26 @@ func (n *NetworkService) TrustPeer(peerID string) error {
 	return nil
 }
 
+func (n *NetworkService) AddPoint(point string) error {
+	query := fmt.Sprintf("/network/points/%s", point)
+	_, err := n.gt.Put(query, nil)
+	if err != nil {
+		return errors.Wrapf(err, "count not add point '%s'", query)
+	}
+
+	return nil
+}
+
+func (n *NetworkService) TrustPoint(point string) error {
+	query := fmt.Sprintf("/network/points/%s/trust", point)
+	_, err := n.gt.Get(query, nil)
+	if err != nil {
+		return errors.Wrapf(err, "count not trust point '%s'", query)
+	}
+
+	return nil
+}
+
 // UnmarshalJSON unmarshals the bytes received as a parameter, into the type NetworkVersion.
 func (nvs *NetworkVersions) unmarshalJSON(v []byte) (NetworkVersions, error) {
 	networkVersions := NetworkVersions{}
