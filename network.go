@@ -190,7 +190,7 @@ func (n *NetworkService) TrustPeer(peerID string) error {
 
 func (n *NetworkService) AddPoint(point string) error {
 	query := fmt.Sprintf("/network/points/%s", point)
-	_, err := n.gt.Put(query, nil)
+	_, err := n.gt.Put(query, "")
 	if err != nil {
 		return errors.Wrapf(err, "count not add point '%s'", query)
 	}

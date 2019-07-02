@@ -94,6 +94,21 @@ func (gt *GoTezos) Post(path string, args string) ([]byte, error) {
 	return resp, nil
 }
 
+// Put takes path endpoint and any arguments and returns the response of the PUT
+func (gt *GoTezos) Put(path string, args string) ([]byte, error) {
+	resp, err := gt.client.Put(path, args)
+	if err != nil {
+		return nil, err
+	}
+
+	err = gt.handleRPCError(resp)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
 func (gt *GoTezos) GetNetworkConstants() (NetworkConstants, error) {
 	if gt.Constants == nil {
 		networkConstants, err := gt.Network.GetConstants()

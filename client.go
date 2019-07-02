@@ -42,25 +42,26 @@ func newClient(URL string) *client {
 	return &client{URL: URL, netClient: netClient}
 }
 
-func (c *client) Post(path, args string) ([]byte, error) {
+func (c *client) Put(path, args string) ([]byte, error) {
 	var respBytes []byte
-	resp, err := c.netClient.Post(c.URL+path, "application/json", bytes.NewBuffer([]byte(args)))
+	request, err := http.NewRequest("PUT", c.URL+path, bytes.NewBuffer([]byte(args)))
 	if err != nil {
 		return respBytes, err
 	}
+	request.Header.Set("content-type", "application/json")
 
-	respBytes, err = ioutil.ReadAll(resp.Body)
+	return c.do(request)
+}
+
+func (c *client) Post(path, args string) ([]byte, error) {
+	var respBytes []byte
+	request, err := http.NewRequest("PUT", c.URL+path, bytes.NewBuffer([]byte(args)))
 	if err != nil {
-		return respBytes, errors.Wrap(err, "could not post")
+		return respBytes, err
 	}
+	request.Header.Set("content-type", "application/json")
 
-	if resp.StatusCode != http.StatusOK {
-		return respBytes, errors.Errorf("%d error: %s", resp.StatusCode, string(respBytes))
-	}
-
-	c.netClient.CloseIdleConnections()
-
-	return respBytes, nil
+	return c.do(request)
 }
 
 func (c *client) Get(path string, params map[string]string) ([]byte, error) {
@@ -78,8 +79,13 @@ func (c *client) Get(path string, params map[string]string) ([]byte, error) {
 		}
 		req.URL.RawQuery = q.Encode()
 	}
+	return c.do(req)
+}
 
-	resp, err := c.netClient.Get(c.URL + path)
+func (c *client) do(req *http.Request) ([]byte, error) {
+	var bytes []byte
+
+	resp, err := c.netClient.Do(req)
 	if err != nil {
 		return bytes, err
 	}
